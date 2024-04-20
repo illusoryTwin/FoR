@@ -1,0 +1,89 @@
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{hyperref}
+\usepackage{caption} % For custom captions
+\usepackage{amsmath}
+\usepackage{multicol}
+\usepackage{subcaption}
+
+
+\title{Fundamentals of Robotics: Assignment 2}
+\author{Ekaterina Mozhegova}
+\date{April 20, 2024}
+
+\begin{document}
+
+\maketitle
+
+\section{Link}
+
+\href{https://colab.research.google.com/drive/170z2YVaeu9kHEuC4bXIWQqJ82eWDJoS2?usp=sharing}{Colab}
+
+\section{Configuration of the chosen robot}
+
+Manipulator with anntropomorphic elbow and a spherical wrist. 
+
+\begin{center}
+    \includegraphics*[width=0.85\textwidth]{images/new_manipulator.png}
+\end{center}
+
+Forward kinematics:
+\[{}^0T_1 = R_z(\theta_1^*) T_z(l_1) R_z(\frac{\pi}{2}) R_x(\frac{\pi}{2})\]
+\[{}^1T_2 = R_z(\theta_2^*) T_x(l_2) \]
+\[{}^2T_3 = R_z(\theta_3^*) T_x(l_3) \]
+\[{}^3T_4 = R_z(\theta_4^*) T_z(l_4) R_x(-\dfrac{\pi}{2}) R_z(-\pi)\]
+\[{}^4T_5 = R_z(\theta_5^*) T_y(l_5) R_x(-\dfrac{\pi}{2})\]
+\[{}^5T_6 = R_z(\theta_6^*)*T_z(l_6)\]
+
+\[{}^0T_6 = {}^0T_1 {}^1T_2 {}^2T_3 {}^3T_4 {}^4T_5 {}^5T_6 \]
+
+\section{Task 1. Derive inverse kinematics for your robot model}
+
+
+Given:
+End-effector position $O_6$ and orientation $R_6$.
+
+Position $P_c$ equals $0T_3$:
+
+\[{}^0T_3 = {}^0T_1 {}^1T_2 {}^2T_3\]
+
+The translation column corresponds to the position of the wrist center. 
+
+Thus, 
+\begin{align*}
+    x_w &= \\
+    y_w &= \\
+    z_w &= 
+\end{align*}
+
+Since we have already calculated $q_1, q_2, q_3$, we can calculate $q_4, q_5, q_6$. 
+
+\[{}^3R_6 = {}^0R_3^{-1} {}^0R_6\]
+
+
+
+
+
+\section{Task 2. Solve inverse kinematics for multiple positions}
+
+\begin{enumerate}
+    \item Solve the first 3 joints for positioning the wrist
+    \item Solve the last 3 jooints for orienting the tool
+\end{enumerate}
+
+Target reference frame: 
+\[T = R_T& t_T\]
+
+\[\]
+
+
+Target wrist point: $p_w = t_{T} - l_6 z_T$
+
+Since $0R_6 = 0R_3 \cdot 3R_6$. 
+\section{Task 3. Track the number of solutions along the way and choose the correct one and closest to
+the previous (current) configuration.}
+\section{Task 4. Derive the jacobian matrix for your robot model.}
+\section{Task 5. Plan a synchronized trajectory for all 6 joints between two poses. (consider 20Hz
+controller frequency)}
+\section{Task 5. Use the Jacobian matrix to check for singularities along the planned trajectory}
+\end{document}

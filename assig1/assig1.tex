@@ -1,0 +1,160 @@
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{hyperref}
+\usepackage{caption} % For custom captions
+\usepackage{amsmath}
+\usepackage{multicol}
+\usepackage{subcaption}
+
+
+\title{Fundamentals of Robotics: Assignment 1}
+\author{Ekaterina Mozhegova}
+\date{April 12, 2024}
+
+\begin{document}
+
+\maketitle
+
+\section{Link}
+
+\href{https://colab.research.google.com/drive/170z2YVaeu9kHEuC4bXIWQqJ82eWDJoS2?usp=sharing}{Colab}
+
+\section{Task 1}
+
+\subsection{Task Description}
+
+\begin{enumerate}
+    \item Select a robot's elbow model. 
+    \item Couple your elbow model with a spherical wrist that satisfies Euler angles arrangement (xyz, xzy,
+xyx, xzx, yxz, yzx, yxy, yzy, zxy, zyx, zyz, zxz) (Make sure it is a spherical wrist)
+    \item Solve Forward kinematics problem (using DH-Parameter is optional). You can use 6
+transformations between two frames.
+\end{enumerate}
+
+
+\subsection{Solution}
+
+\subsubsection{Elbow}
+
+The chosen elbow model - \textbf{Antropomorphic}.
+\begin{center}
+    \includegraphics*[width=0.65\textwidth]{images/new_elbow.png}
+\end{center}
+
+
+Let's describe the transformation matrices for transitions between each coordinate frame of  the elbow:
+
+\[{}^0T_1 = R_z(\theta_1^*) T_z(l_1) R_z(\frac{\pi}{2}) R_x(\frac{\pi}{2})\]
+\[{}^1T_2 = R_z(\theta_2^*) T_x(l_2) \]
+\[{}^2T_3 = R_z(\theta_3^*) T_x(l_3) \]
+
+
+Thus, the transformation matrix for the elbow is as follows:
+\[{}^0T_3 = {}^0T_1 {}^1T_2 {}^2T_3 \]
+
+
+
+\subsubsection{Spherical wrist}
+
+\begin{center}
+    \includegraphics*[width=0.85\textwidth]{images/new_spherical_wrist.png}
+\end{center}
+
+The wrist is spherical since all revolute axes intersect in a single point. 
+
+Let's describe the transformation matrices for transitions between each coordinate frame of  the wrist:
+\[{}^3T_4 = R_z(\theta_4^*) T_z(l_4) R_x(-\dfrac{\pi}{2}) R_z(-\pi)\]
+\[{}^4T_5 = R_z(\theta_5^*) T_y(l_5) R_x(-\dfrac{\pi}{2})\]
+\[{}^5T_6 = R_z(\theta_6^*)*T_z(l_6)\]
+
+Thus, the transformation matrix for the wrist is as follows:
+\[{}^3T_6 = {}^3T_4 {}^4T_5 {}^5T_6 \]
+
+This spherical wrist is associated with the $ZYZ$ Euler angles arrangement.
+
+
+\subsubsection{Manipulator: antropomorphic elbow coupled with a spherical wrist}
+
+The assembly of the manipulator with the spherical wrist coupled to the elbow is as follows.
+
+\begin{center}
+    \includegraphics*[width=0.85\textwidth]{images/new_manipulator.png}
+\end{center}
+
+This configuration is described by B. Siciliano in \emph{Robotics: Modelling, Planning, and Control}.
+
+\subsubsection{Forward kinematics}
+
+
+There are two approaches for solving forward kinematics problem: 
+
+\begin{enumerate}
+    \item 
+    For this manipulator, consisting of an anthropomorphic arm with a spherical wrist,
+    the direct kinematics problem cannot be obtained by pure multiplication of transformation matrices ${}^0T_3$ and ${}^3T_6$ since 
+    the elbow needs to coincide with the spherical wrist. 
+    We need to transform from the final reference frame of the elbow to the base reference frame of the wrist.
+    So, one more transformation matrix has to be introduced, this matrix will describe transition between those two reference frames.
+    \item We multiply all the transformation matrices - transitions between the reference frames.
+\end{enumerate}
+
+
+\underline{\textbf{Method 1}}\\
+
+Let's solve the Forward Kinematics problem via the \textbf{method 1}.
+
+We already defined the transformation matrices for the elbow and for the wrist - ${}^0T_3$, ${}^3T_6$. 
+
+Now we need to introduce matrix $T^*$ defining the transition from the elbow to the wrist.
+
+\[T^* = R_y(\dfrac{\pi}{2}) R_z(\dfrac{\pi}{2})\]
+
+
+Thus, the transformation matrix for the end-effector is as follows:
+\[{}^0T_6 = {}^0T_3 \cdot T^* \cdot {}^3T_6\]
+
+
+
+
+\underline{\textbf{Method 2}}\\
+
+Now let's solve the Forward Kinematics problem via the \textbf{method 2}.
+
+The consecutive multiplication of the transformation matrices between the reference frames is as follows:
+
+\[{}^0T_1 = R_z(\theta_1^*) T_z(l_1) R_z(\frac{\pi}{2}) R_x(\frac{\pi}{2})\]
+\[{}^1T_2 = R_z(\theta_2^*) T_x(l_2) \]
+\[{}^2T_3 = R_z(\theta_3^*) T_x(l_3) R_y(\dfrac{\pi}{2}) R_z(\dfrac{\pi}{2})\]
+\[{}^3T_4 = R_z(\theta_4^*) T_z(l_4) R_x(-\dfrac{\pi}{2}) R_z(-\pi)\]
+\[{}^4T_5 = R_z(\theta_5^*) T_y(l_5) R_x(-\dfrac{\pi}{2})\]
+\[{}^5T_6 = R_z(\theta_6^*) T_z(l_6)\]
+
+
+Thus, the transformation matrix for the end-effector is as follows:
+\[{}^0T_6 = {}^0T_1 {}^1T_2 {}^2T_3 {}^3T_4 {}^4T_5 {}^5T_6\]
+
+
+
+Solving symbolically, we come up with ${}^0T_6$. For this, please, check Colab.\\
+
+
+
+
+
+\newpage
+
+\subsubsection{Different manipulator's configrations}
+
+\textbf{Configration 1}
+
+\begin{center}
+    \includegraphics*[width=0.75\textwidth]{images/config1.png}
+\end{center}
+
+\textbf{Configration 2}
+
+\begin{center}
+    \includegraphics*[width=0.75\textwidth]{images/config2.png}
+\end{center}
+
+\end{document}
