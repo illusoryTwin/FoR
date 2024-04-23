@@ -5,7 +5,7 @@
 \usepackage{amsmath}
 \usepackage{multicol}
 \usepackage{subcaption}
-
+\usepackage{amsmath}
 
 \title{Fundamentals of Robotics: Assignment 2}
 \author{Ekaterina Mozhegova}
@@ -17,7 +17,7 @@
 
 \section{Link}
 
-\href{https://colab.research.google.com/drive/170z2YVaeu9kHEuC4bXIWQqJ82eWDJoS2?usp=sharing}{Colab}
+\href{https://colab.research.google.com/drive/1hU13PXIqbAtPv2cby5qNB10PobzW39JC?usp=sharing}{Colab}
 
 \section{Configuration of the chosen robot}
 
@@ -33,9 +33,16 @@ Forward kinematics:
 \[{}^2T_3 = R_z(\theta_3^*) T_x(l_3) \]
 \[{}^3T_4 = R_z(\theta_4^*) T_z(l_4) R_x(-\dfrac{\pi}{2}) R_z(-\pi)\]
 \[{}^4T_5 = R_z(\theta_5^*) T_y(l_5) R_x(-\dfrac{\pi}{2})\]
-\[{}^5T_6 = R_z(\theta_6^*)*T_z(l_6)\]
+\[{}^5T_6 = R_z(\theta_6^*) T_z(l_6) \]
 
 \[{}^0T_6 = {}^0T_1 {}^1T_2 {}^2T_3 {}^3T_4 {}^4T_5 {}^5T_6 \]
+
+Let's define its geometry:
+\[l_1 = 1, l_2 = 0.5, l_3 = 0.4, l_4 =0.4, l_5=0.5, l_6 = 0.4\]
+
+And let's define the end-effector position:
+\[x_6=1.5, y_6=0.5, z_6 = 1.5\]
+
 
 \section{Task 1. Derive inverse kinematics for your robot model}
 
@@ -43,11 +50,44 @@ Forward kinematics:
 Given:
 End-effector position $O_6$ and orientation $R_6$.
 
-Position $P_c$ equals $0T_3$:
+Position $P_c$ equals ${}^0T_3$:
 
 \[{}^0T_3 = {}^0T_1 {}^1T_2 {}^2T_3\]
 
-The translation column corresponds to the position of the wrist center. 
+\[{}^0T_3 = R_z(\theta_1^*) T_z(l_1) R_z(\frac{\pi}{2}) R_x(\frac{\pi}{2}) R_z(\theta_2^*) T_x(l_2) R_z(\theta_3^*) T_x(l_3) \]
+
+
+\[
+\begin{bmatrix}
+    \sin(\theta_1)\sin(\theta_2)\cos(\theta_3) + \sin(\theta_1)\sin(\theta_3)\cos(\theta_2) & \cos(\theta_1) & \sin(\theta_1)\sin(\theta_2)\sin(\theta_3) - \sin(\theta_1)\cos(\theta_2)\cos(\theta_3) & -l_2\sin(\theta_1)\cos(\theta_2) + l_3\sin(\theta_1)\sin(\theta_2)\sin(\theta_3) - l_3\sin(\theta_1)\cos(\theta_2)\cos(\theta_3) \\
+    -\sin(\theta_2)\cos(\theta_1)\cos(\theta_3) - \sin(\theta_3)\cos(\theta_1)\cos(\theta_2) & \sin(\theta_1) & -\sin(\theta_2)\sin(\theta_3)\cos(\theta_1) + \cos(\theta_1)\cos(\theta_2)\cos(\theta_3) & l_2\cos(\theta_1)\cos(\theta_2) - l_3\sin(\theta_2)\sin(\theta_3)\cos(\theta_1) + l_3\cos(\theta_1)\cos(\theta_2)\cos(\theta_3) \\
+    -\sin(\theta_2)\sin(\theta_3) + \cos(\theta_2)\cos(\theta_3) & 0 & \sin(\theta_2)\cos(\theta_3) + \sin(\theta_3)\cos(\theta_2) & l_1 + l_2\sin(\theta_2) + l_3\sin(\theta_2)\cos(\theta_3) + l_3\sin(\theta_3)\cos(\theta_2) \\
+    0 & 0 & 0 & 1
+\end{bmatrix}
+\]
+
+We can retrieve the coordinates of the wrist center from the rightmost column of ${}^0T_3$.
+
+\[
+\begin{cases}    
+    x = -l_2 \sin(\theta_1) \cos(\theta_2) + l_3 \sin(\theta_1) \sin(\theta_2) \sin(\theta_3) - l_3 \sin(\theta_1) \cos(\theta_2) \cos(\theta_3) \\
+    y = l_2 \cos(\theta_1) \cos(\theta_2) - l_3 \sin(\theta_2) \sin(\theta_3) \cos(\theta_1) + l_3 \cos(\theta_1) \cos(\theta_2) \cos(\theta_3) \\
+    z = l_1 + l_2 \sin(\theta_2) + l_3 \sin(\theta_2) \cos(\theta_2) + l_3 \sin(\theta_3) \cos(\theta_2)
+\end{cases}    
+\]
+
+\[
+\begin{cases}    
+    x =  -\sin(\theta_1)(l_2 \cos(\theta_2) - l_3 \sin(\theta_2) \sin(\theta_3) + l_3 \cos(\theta_2) \cos(\theta_3)) \\
+    y = \cos(\theta_1) (l_2  \cos(\theta_2) - l_3 \sin(\theta_2) \sin(\theta_3) + l_3 \cos(\theta_2) \cos(\theta_3)) \\
+    z = l_1 + l_2 \sin(\theta_2) + l_3 \sin(\theta_2) \cos(\theta_2) + l_3 \sin(\theta_3) \cos(\theta_2)
+\end{cases}    
+\]
+
+\[-\tan(\theta_1) = -\frac{\sin(\theta_1)}{\cos(\theta_1)} = \dfrac{x}{y}\]
+
+\[\theta_1 = -\arctan2(\dfrac{x}{y})\]
+
 
 Thus, 
 \begin{align*}
@@ -58,9 +98,11 @@ Thus,
 
 Since we have already calculated $q_1, q_2, q_3$, we can calculate $q_4, q_5, q_6$. 
 
-\[{}^3R_6 = {}^0R_3^{-1} {}^0R_6\]
+\[{}^3R_6 = ({}^0R_3^{-1}) {}^0R_6\]
 
 
+
+\[\]
 
 
 
@@ -72,9 +114,9 @@ Since we have already calculated $q_1, q_2, q_3$, we can calculate $q_4, q_5, q_
 \end{enumerate}
 
 Target reference frame: 
-\[T = R_T& t_T\]
+% \[T = R_T& t_T\]
 
-\[\]
+% \[\]
 
 
 Target wrist point: $p_w = t_{T} - l_6 z_T$
@@ -83,6 +125,8 @@ Since $0R_6 = 0R_3 \cdot 3R_6$.
 \section{Task 3. Track the number of solutions along the way and choose the correct one and closest to
 the previous (current) configuration.}
 \section{Task 4. Derive the jacobian matrix for your robot model.}
+
+
 \section{Task 5. Plan a synchronized trajectory for all 6 joints between two poses. (consider 20Hz
 controller frequency)}
 \section{Task 5. Use the Jacobian matrix to check for singularities along the planned trajectory}
