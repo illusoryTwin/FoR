@@ -21,7 +21,7 @@
 
 \section{Configuration of the chosen robot}
 
-Manipulator with anntropomorphic elbow and a spherical wrist. 
+Manipulator with antropomorphic elbow and a spherical wrist. 
 
 \begin{center}
     \includegraphics*[width=0.85\textwidth]{images/new_manipulator.png}
@@ -37,97 +37,216 @@ Forward kinematics:
 
 \[{}^0T_6 = {}^0T_1 {}^1T_2 {}^2T_3 {}^3T_4 {}^4T_5 {}^5T_6 \]
 
-Let's define its geometry:
-\[l_1 = 1, l_2 = 0.5, l_3 = 0.4, l_4 =0.4, l_5=0.5, l_6 = 0.4\]
+% Let's define its geometry:
+% \[l_1 = 1, l_2 = 0.5, l_3 = 0.4, l_4 =0.4, l_5=0.5, l_6 = 0.4\]
 
-And let's define the end-effector position:
-\[x_6=1.5, y_6=0.5, z_6 = 1.5\]
+% And let's define the end-effector position:
+% \[x_6=1.5, y_6=0.5, z_6 = 1.5\]
 
 
 \section{Task 1. Derive inverse kinematics for your robot model}
 
+\subsection{$q_1$}
 
-Given:
-End-effector position $O_6$ and orientation $R_6$.
+\underline{Given:} End-effector position and orientation ${}^0T_6$.\\
 
-Position $P_c$ equals ${}^0T_3$:
+First, let's define the configuration of the wrist center by solving forward kinematics. 
+The end-effector position corresponds to the position of the wrist center; 
+the 6th joint defines the end-effector orientation. 
 
-\[{}^0T_3 = {}^0T_1 {}^1T_2 {}^2T_3\]
-
-\[{}^0T_3 = R_z(\theta_1^*) T_z(l_1) R_z(\frac{\pi}{2}) R_x(\frac{\pi}{2}) R_z(\theta_2^*) T_x(l_2) R_z(\theta_3^*) T_x(l_3) \]
-
-
-\[
-\begin{bmatrix}
-    \sin(\theta_1)\sin(\theta_2)\cos(\theta_3) + \sin(\theta_1)\sin(\theta_3)\cos(\theta_2) & \cos(\theta_1) & \sin(\theta_1)\sin(\theta_2)\sin(\theta_3) - \sin(\theta_1)\cos(\theta_2)\cos(\theta_3) & -l_2\sin(\theta_1)\cos(\theta_2) + l_3\sin(\theta_1)\sin(\theta_2)\sin(\theta_3) - l_3\sin(\theta_1)\cos(\theta_2)\cos(\theta_3) \\
-    -\sin(\theta_2)\cos(\theta_1)\cos(\theta_3) - \sin(\theta_3)\cos(\theta_1)\cos(\theta_2) & \sin(\theta_1) & -\sin(\theta_2)\sin(\theta_3)\cos(\theta_1) + \cos(\theta_1)\cos(\theta_2)\cos(\theta_3) & l_2\cos(\theta_1)\cos(\theta_2) - l_3\sin(\theta_2)\sin(\theta_3)\cos(\theta_1) + l_3\cos(\theta_1)\cos(\theta_2)\cos(\theta_3) \\
-    -\sin(\theta_2)\sin(\theta_3) + \cos(\theta_2)\cos(\theta_3) & 0 & \sin(\theta_2)\cos(\theta_3) + \sin(\theta_3)\cos(\theta_2) & l_1 + l_2\sin(\theta_2) + l_3\sin(\theta_2)\cos(\theta_3) + l_3\sin(\theta_3)\cos(\theta_2) \\
-    0 & 0 & 0 & 1
-\end{bmatrix}
-\]
-
-We can retrieve the coordinates of the wrist center from the rightmost column of ${}^0T_3$.
-
-\[
-\begin{cases}    
-    x = -l_2 \sin(\theta_1) \cos(\theta_2) + l_3 \sin(\theta_1) \sin(\theta_2) \sin(\theta_3) - l_3 \sin(\theta_1) \cos(\theta_2) \cos(\theta_3) \\
-    y = l_2 \cos(\theta_1) \cos(\theta_2) - l_3 \sin(\theta_2) \sin(\theta_3) \cos(\theta_1) + l_3 \cos(\theta_1) \cos(\theta_2) \cos(\theta_3) \\
-    z = l_1 + l_2 \sin(\theta_2) + l_3 \sin(\theta_2) \cos(\theta_2) + l_3 \sin(\theta_3) \cos(\theta_2)
-\end{cases}    
-\]
-
-\[
-\begin{cases}    
-    x =  -\sin(\theta_1)(l_2 \cos(\theta_2) - l_3 \sin(\theta_2) \sin(\theta_3) + l_3 \cos(\theta_2) \cos(\theta_3)) \\
-    y = \cos(\theta_1) (l_2  \cos(\theta_2) - l_3 \sin(\theta_2) \sin(\theta_3) + l_3 \cos(\theta_2) \cos(\theta_3)) \\
-    z = l_1 + l_2 \sin(\theta_2) + l_3 \sin(\theta_2) \cos(\theta_2) + l_3 \sin(\theta_3) \cos(\theta_2)
-\end{cases}    
-\]
-
-\[-\tan(\theta_1) = -\frac{\sin(\theta_1)}{\cos(\theta_1)} = \dfrac{x}{y}\]
-
-\[\theta_1 = -\arctan2(\dfrac{x}{y})\]
-
-
-Thus, 
 \begin{align*}
-    x_w &= \\
-    y_w &= \\
-    z_w &= 
+    T_{01} &= R_z(\theta_1) \cdot T_z(l_1) \cdot R_z(\frac{\pi}{2}) \cdot R_x(\frac{\pi}{2}) \\
+    T_{12} &= R_z(\theta_2) \cdot T_x(l_2) \\
+    T_{23} &= R_z(\theta_3) \cdot T_x(l_3 + l_4) \cdot R_y(\frac{\pi}{2}) \cdot R_z(\frac{\pi}{2}) \\
+    T_{\text{wrist\_center}} &= T_0 \cdot T_{01} \cdot T_{12} \cdot T_{23}
 \end{align*}
 
-Since we have already calculated $q_1, q_2, q_3$, we can calculate $q_4, q_5, q_6$. 
-
-\[{}^3R_6 = ({}^0R_3^{-1}) {}^0R_6\]
-
-
-
-\[\]
+Let's solve the forward kinematics problem for the wrist center symbolically.
+Notice the translation column of the transformation matrix.  
+From it we can retrieve the value of $q_1 = \theta_1$.
 
 
+\[
+\begin{smallmatrix}
+    x \\ y \\ z
+\end{smallmatrix}
+=
+\begin{smallmatrix}
+    0.8 \sin(\theta_1) \sin(\theta_2) \sin(\theta_3) - 0.8 \sin(\theta_1) \cos(\theta_2) \cos(\theta_3) - 1.0 \sin(\theta_1) \cos(\theta_2) \\
+    -0.8 \sin(\theta_2) \sin(\theta_3) \cos(\theta_1) + 0.8 \cos(\theta_1) \cos(\theta_2) \cos(\theta_3) + 1.0 \cos(\theta_1) \cos(\theta_2) \\
+    0.8 \sin(\theta_2) \cos(\theta_3) + 1.0 \sin(\theta_2) + 0.8 \sin(\theta_3) \cos(\theta_2) + 0.3
+\end{smallmatrix}
+\]
 
-\section{Task 2. Solve inverse kinematics for multiple positions}
+We can see that:
+\[\frac{x}{y} = -\frac{\sin(\theta_1)}{\cos(\theta_1)}\]
 
-\begin{enumerate}
-    \item Solve the first 3 joints for positioning the wrist
-    \item Solve the last 3 jooints for orienting the tool
-\end{enumerate}
+\[\tan(\theta_1) = -\dfrac{x}{y}\]
+\[\theta_1 = -\arctan(\dfrac{x}{y})\]
 
-Target reference frame: 
-% \[T = R_T& t_T\]
+\subsection{$q_3$}
+
+We can find the value of $q_3 = \theta_3$ by the cosine theorem. 
+
+\[q3 = \arccos\left(\frac{{(z-l1)^2 + (x^2+y^2) - l2^2 - (l3+l4)^2}}{{2 \cdot l2 \cdot (l3+l4)}}\right)\]
+
+\subsection{$q_2$}
+
+\[r = \sqrt{x^2 + y^2}\]
+
+\[s = z - l1\]
+
+\[q_2 = \arcsin\left(\frac{{(l2 + (l3 + l4)\cos(q_3)) \cdot s - (l3 + l4)\sin(q_3) \cdot r}}{{r^2 + s^2}}\right)\]
+
+
+\subsection{$q_4$}
+
+We know that 
+\[{}^0R_6 = {}^0R_3 \cdot {}^3R_6\]
+\[{}^3R_6 = ({}^0R_3^T) {}^0R_6\]
+We have already calculated the angles $q_1$, $q_2$, and $q_3$, so we can calculate ${}^0R_3^T$. Additionally, we know ${}^0R_6$ since the end-effector position is provided to us. 
+Thus, with ${}^3R_6$, we can determine all remaining angles.
+
+
+Let's solve ${}^3R_6$ symbolically, 
+
+\[
+\begin{smallmatrix}
+\sin(\theta_4)\sin(\theta_6) - \cos(\theta_4)\cos(\theta_5)\cos(\theta_6) & \sin(\theta_4)\cos(\theta_6) + \sin(\theta_6)\cos(\theta_4)\cos(\theta_5) & \sin(\theta_5)\cos(\theta_4) \\
+-\sin(\theta_4)\cos(\theta_5)\cos(\theta_6) - \sin(\theta_6)\cos(\theta_4) & \sin(\theta_4)\sin(\theta_6)\cos(\theta_5) - \cos(\theta_4)\cos(\theta_6) & \sin(\theta_4)\sin(\theta_5) \\
+\sin(\theta_5)\cos(\theta_6) & -\sin(\theta_5)\sin(\theta_6) & \cos(\theta_5)
+\end{smallmatrix}
+\]
+
+
+In order to find $q_4$ we can solve $\frac{sin(\theta_4) \sin(\theta_5)}{\sin(\theta_5) \cos(\theta_4)}$. 
+
+If $\sin(\theta_5) \neq 0$, then $q_4 = \arctan(\frac{\sin(\theta_4)}{\cos(\theta_4)})$. 
+
+
+\subsection{$q_5$}
+
+\[\left(\sin(\theta_5) \cos(\theta_4)\right)^2 + \left(\sin(\theta_4) \sin(\theta_5)\right)^2 = \sin(\theta_5)^2\]
+\[ \theta_5= \arctan2(\sqrt{\left(\sin(\theta_5) \cos(\theta_4)\right)^2 + \left(\sin(\theta_4) \sin(\theta_5)\right)^2}, \cos(\theta_5)) \]
+
+% sin5 = 0
+% if np.sign(R36[1][2])/np.sign(np.sin(q4)) > 0:
+%   sin5 = np.sqrt(R36[0][2]**2 + R36[1][2]**2)
+% elif np.sign(R36[1][2])/np.sin(q4) < 0:
+%   sin5 = -np.sqrt(R36[0][2]**2 + R36[1][2]**2)
+
+% q5 = np.arctan2(sin5, R36[2][2])
+
+\subsection{$q_6$}
+
+Analogically to $q_4$, we can find the value of $q_6$ from ${}^3R_6$:
+
+\[\frac{-\sin(\theta_5) \sin(\theta_6)}{\sin(\theta_5) \cos(\theta_6)}\]
+
+If $\sin(\theta_5) \neq 0$, then $q_6 = \arctan(\frac{-\sin(\theta_6)}{\cos(\theta_6)})$. 
+
+
+
+
+% Position $P_c$ equals ${}^0T_3$:
+
+% \[{}^0T_3 = {}^0T_1 {}^1T_2 {}^2T_3\]
+
+% \[{}^0T_3 = R_z(\theta_1^*) T_z(l_1) R_z(\frac{\pi}{2}) R_x(\frac{\pi}{2}) R_z(\theta_2^*) T_x(l_2) R_z(\theta_3^*) T_x(l_3) \]
+
+
+% \[
+% \begin{bmatrix}
+%     \sin(\theta_1)\sin(\theta_2)\cos(\theta_3) + \sin(\theta_1)\sin(\theta_3)\cos(\theta_2) & \cos(\theta_1) & \sin(\theta_1)\sin(\theta_2)\sin(\theta_3) - \sin(\theta_1)\cos(\theta_2)\cos(\theta_3) & -l_2\sin(\theta_1)\cos(\theta_2) + l_3\sin(\theta_1)\sin(\theta_2)\sin(\theta_3) - l_3\sin(\theta_1)\cos(\theta_2)\cos(\theta_3) \\
+%     -\sin(\theta_2)\cos(\theta_1)\cos(\theta_3) - \sin(\theta_3)\cos(\theta_1)\cos(\theta_2) & \sin(\theta_1) & -\sin(\theta_2)\sin(\theta_3)\cos(\theta_1) + \cos(\theta_1)\cos(\theta_2)\cos(\theta_3) & l_2\cos(\theta_1)\cos(\theta_2) - l_3\sin(\theta_2)\sin(\theta_3)\cos(\theta_1) + l_3\cos(\theta_1)\cos(\theta_2)\cos(\theta_3) \\
+%     -\sin(\theta_2)\sin(\theta_3) + \cos(\theta_2)\cos(\theta_3) & 0 & \sin(\theta_2)\cos(\theta_3) + \sin(\theta_3)\cos(\theta_2) & l_1 + l_2\sin(\theta_2) + l_3\sin(\theta_2)\cos(\theta_3) + l_3\sin(\theta_3)\cos(\theta_2) \\
+%     0 & 0 & 0 & 1
+% \end{bmatrix}
+% \]
+
+% We can retrieve the coordinates of the wrist center from the rightmost column of ${}^0T_3$.
+
+% \[
+% \begin{cases}    
+%     x = -l_2 \sin(\theta_1) \cos(\theta_2) + l_3 \sin(\theta_1) \sin(\theta_2) \sin(\theta_3) - l_3 \sin(\theta_1) \cos(\theta_2) \cos(\theta_3) \\
+%     y = l_2 \cos(\theta_1) \cos(\theta_2) - l_3 \sin(\theta_2) \sin(\theta_3) \cos(\theta_1) + l_3 \cos(\theta_1) \cos(\theta_2) \cos(\theta_3) \\
+%     z = l_1 + l_2 \sin(\theta_2) + l_3 \sin(\theta_2) \cos(\theta_2) + l_3 \sin(\theta_3) \cos(\theta_2)
+% \end{cases}    
+% \]
+
+% \[
+% \begin{cases}    
+%     x =  -\sin(\theta_1)(l_2 \cos(\theta_2) - l_3 \sin(\theta_2) \sin(\theta_3) + l_3 \cos(\theta_2) \cos(\theta_3)) \\
+%     y = \cos(\theta_1) (l_2  \cos(\theta_2) - l_3 \sin(\theta_2) \sin(\theta_3) + l_3 \cos(\theta_2) \cos(\theta_3)) \\
+%     z = l_1 + l_2 \sin(\theta_2) + l_3 \sin(\theta_2) \cos(\theta_2) + l_3 \sin(\theta_3) \cos(\theta_2)
+% \end{cases}    
+% \]
+
+% \[-\tan(\theta_1) = -\frac{\sin(\theta_1)}{\cos(\theta_1)} = \dfrac{x}{y}\]
+
+% \[\theta_1 = -\arctan2(\dfrac{x}{y})\]
+
+
+% Thus, 
+% \begin{align*}
+%     x_w &= \\
+%     y_w &= \\
+%     z_w &= 
+% \end{align*}
+
+% Since we have already calculated $q_1, q_2, q_3$, we can calculate $q_4, q_5, q_6$. 
+
+% \[{}^3R_6 = ({}^0R_3^{-1}) {}^0R_6\]
+
+
 
 % \[\]
 
 
-Target wrist point: $p_w = t_{T} - l_6 z_T$
 
-Since $0R_6 = 0R_3 \cdot 3R_6$. 
-\section{Task 3. Track the number of solutions along the way and choose the correct one and closest to
-the previous (current) configuration.}
+% \section{Task 2. Solve inverse kinematics for multiple positions}
+
+% \begin{enumerate}
+%     \item Solve the first 3 joints for positioning the wrist
+%     \item Solve the last 3 jooints for orienting the tool
+% \end{enumerate}
+
+% Target reference frame: 
+% % \[T = R_T& t_T\]
+
+% % \[\]
+
+
+% Target wrist point: $p_w = t_{T} - l_6 z_T$
+
+% Since $0R_6 = 0R_3 \cdot 3R_6$. 
+
+% \section{Task 3. Track the number of solutions along the way and choose the correct one and closest to
+% the previous (current) configuration.}
+
 \section{Task 4. Derive the jacobian matrix for your robot model.}
 
+\[ J = [J_1 \quad J_2 \quad \ldots \quad J_6] \]
+
+In screw theory, the Jacobian is defined as:
+
+\[ J = \begin{bmatrix}
+    U_{i-1} \times (O_n - O_{i-1}) \\
+    U_{i-1}
+\end{bmatrix} \]
+
+    
+$U_{i-1}$ is the column vector corresponding to the axis of rotation matrix (in our case, z). 
+$O_{i-1}$ is the translation vector of transformation matrix for $T_{i-1}$. \\
+
+\underline{Singularity}
+
+To check the singularity of the Jacobian, we need to check whether its determinant is not 
+equal to 0. 
 
 \section{Task 5. Plan a synchronized trajectory for all 6 joints between two poses. (consider 20Hz
 controller frequency)}
-\section{Task 5. Use the Jacobian matrix to check for singularities along the planned trajectory}
+
+
+% \section{Task 5. Use the Jacobian matrix to check for singularities along the planned trajectory}
 \end{document}
