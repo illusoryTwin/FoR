@@ -44,7 +44,11 @@ Forward kinematics:
 % \[x_6=1.5, y_6=0.5, z_6 = 1.5\]
 
 
-\section{Task 1. Derive inverse kinematics for your robot model}
+\section{Task 1-3}
+\textbf{Task 1. Derive inverse kinematics for your robot model.\\}
+\textbf{Task 2. Solve inverse kinematics for multiple positions.\\}
+\textbf{Task 3. Track the number of solutions along the way and choose the correct one and closest to
+the previous (current) configuration.}\\
 
 \subsection{$q_1$}
 
@@ -203,26 +207,16 @@ If $\sin(\theta_5) \neq 0$, then $q_6 = \arctan(\frac{-\sin(\theta_6)}{\cos(\the
 % \[\]
 
 
+\subsection{Singularity analysis}
 
-% \section{Task 2. Solve inverse kinematics for multiple positions}
+Singularity occurs when:
+\begin{enumerate}
+    \item $\theta_3 = 0$ or $\theta_3 = \pi$. 
+    \item $\theta_5 = 0$ or $\theta_5 = \pi$. 
+\end{enumerate}
 
-% \begin{enumerate}
-%     \item Solve the first 3 joints for positioning the wrist
-%     \item Solve the last 3 jooints for orienting the tool
-% \end{enumerate}
-
-% Target reference frame: 
-% % \[T = R_T& t_T\]
-
-% % \[\]
-
-
-% Target wrist point: $p_w = t_{T} - l_6 z_T$
-
-% Since $0R_6 = 0R_3 \cdot 3R_6$. 
-
-% \section{Task 3. Track the number of solutions along the way and choose the correct one and closest to
-% the previous (current) configuration.}
+When a singularity situation arises in the inverse kinematics solution, 
+we can revert back to the previous non-singular solution for this joint.
 
 \section{Task 4. Derive the jacobian matrix for your robot model.}
 
@@ -244,9 +238,65 @@ $O_{i-1}$ is the translation vector of transformation matrix for $T_{i-1}$. \\
 To check the singularity of the Jacobian, we need to check whether its determinant is not 
 equal to 0. 
 
-\section{Task 5. Plan a synchronized trajectory for all 6 joints between two poses. (consider 20Hz
-controller frequency)}
+Alternatively, we can check the rank of the matrix. A non-singular matrix is full-rank, whereas a singular matrix is not full-rank.
+
+\section{Task 5-6.}
+\textbf{Task 5. Plan a synchronized trajectory for all 6 joints between two poses. (consider 20Hz
+controller frequency).\\}
+
+\textbf{Task 6. Use the Jacobian matrix to check for singularities along the planned trajectory.}
+
+\subsection{Trajectory Time}
+Based on the $q$ parameters $[q_0, q_f, \dot{q}_{\text{max}}, \ddot{q}_{\text{max}}]$, we can determine the velocity profile and calculate the time for the trajectory.
+
+\textbf{Triangular profile:}
+\[
+\text{If } \sqrt{\delta_q \times \ddot{q}_{\text{max}}} \leq \dot{q}_{\text{max}}, \text{ then:}
+\]
+\[
+\tau = \frac{\delta_q}{\dot{q}_{\text{max}}}, \quad T = \tau, \quad tf = 2\tau
+\]
+
+\textbf{Trapezoidal profile:}
+\[
+\text{Otherwise, we have:}
+\]
+\[
+T = \frac{\delta_q}{\dot{q}_{\text{max}}}, \quad \tau = \frac{\dot{q}_{\text{max}}}{\ddot{q}_{\text{max}}}
+\]
 
 
-% \section{Task 5. Use the Jacobian matrix to check for singularities along the planned trajectory}
+Based on the time parameters obtained, we can determine the trajectory for the trapezoidal profile in the following way:
+\[
+\begin{cases}
+q = q_0 + \frac{1}{2} \ddot{q}_{\text{max}} \cdot (t_i - t_0)^2, & \quad 0 < t_i \leq \tau \\
+v = \min(\ddot{q}_{\text{max}} \cdot t, \dot{q}_{\text{max}}) \\
+a = \ddot{q}_{\text{max}}, & \quad 0 < t_i \leq \tau
+\end{cases}
+\]
+
+
+\[
+\begin{cases}
+q = q_0 + dq_0 \cdot (t_i - \tau), \quad \tau < t_i \leq T\\
+v = \dot{q}_{\text{max}}\\
+a = 0
+\end{cases}
+\]
+
+\[
+\begin{cases}
+q = q_{\text{T}} + \dot{q}_{\text{T}} \cdot (t_i - T) - \frac{1}{2} \ddot{q}_{\text{max}} \cdot (t_i - T)^2, \quad T < t_i \leq t_f\\
+v = \min(\ddot{q}_{\text{max}} \cdot (t_f - t_i), \dot{q}_{\text{max}})\\
+a = -\ddot{q}_{\text{max}}
+\end{cases}
+\]
+
+\subsection{Synchronization}
+In the case of multiple joints, trajectory planning needs to be synchronized based on time.
+To incorporate control with a frequency of 20 Hz, we can discretize time parameters.
+Additionally, along the trajectory, we track the Jacobian to ensure a non-zero determinant.
+
+For more details, please, refer to the code in colab.
+
 \end{document}
